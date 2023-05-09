@@ -1,4 +1,3 @@
-
 <?php
 if (!defined('ABSPATH'))
     exit;
@@ -749,9 +748,8 @@ class APIFW_Invoice
                                                 if( $order_data['billing_address']['city'] != '' ):
                                                     $html .= "<b>Ciudad: </b>".$order_data['billing_address']['city']."<br/>";
                                                 endif;
-                                                if( $order_data['billing_address']['cedula'] != '' ):
-                                                    $html .= "<b>Cédula: </b>".$order_data['billing_address']['cedula']."<br/>";
-                                                    $html .= "<b>Sender Cédula: </b>".$sender_cedula."<br/>";
+                                                if( $order_data['billing_address']['postcode'] != '' ):
+                                                    $html .= "<b>Cédula: </b>".$order_data['billing_address']['postcode']."<br/>";
                                                 endif;
                                                 if( $order_data['billing_address']['formated_state'] != '' ):
                                                     $html .= $order_data['billing_address']['formated_state'].", ";
@@ -794,8 +792,8 @@ class APIFW_Invoice
                                                 if( $order_data['shipping_address']['city'] != '' ):
                                                     $html .= $order_data['shipping_address']['city'].", ";
                                                 endif;
-                                                if( $order_data['shipping_address']['cedula'] != '' ):
-                                                    $html .= $order_data['shipping_address']['cedula']."<br/>";
+                                                if( $order_data['shipping_address']['postcode'] != '' ):
+                                                    $html .= $order_data['shipping_address']['postcode']."<br/>";
                                                 endif;
                                                 if( $order_data['shipping_address']['formated_state'] != '' ):
                                                     $html .= $order_data['shipping_address']['formated_state'].", ";
@@ -977,8 +975,8 @@ class APIFW_Invoice
                                         if( $from_address['visbility']['city'] == true ):
                                             $html .= "<p style='".$from_address_content_style."'>".$sender_city."</p>";
                                         endif;
-                                        if( $from_address['visbility']['cedula'] == true ):
-                                            $html .= "<p <b>CDI:</b> style='".$from_address_content_style."'>".$sender_cedula."</p>";
+                                        if( $from_address['visbility']['postCode'] == true ):
+                                            $html .= "<p <b>CDI:</b> style='".$from_address_content_style."'>".$sender_postal_code."</p>";
                                         endif;
                                         if( $from_address['visbility']['country'] == true ):
                                             $html .= "<p style='".$from_address_content_style."'>".$sender_country."</p>";
@@ -1511,4 +1509,3 @@ class APIFW_Invoice
         }    
     }
 }
-?>
