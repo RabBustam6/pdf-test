@@ -1,0 +1,236 @@
+// Función para agregar el metabox
+function agregar_metabox_pedido() {
+    add_meta_box(
+        'metabox_pedido',
+        'Pedido',
+        'contenido_metabox_pedido',
+        'shop_order',
+        'normal',
+        'high'
+    );
+}
+add_action('add_meta_boxes', 'agregar_metabox_pedido');
+
+
+// Contenido del metabox
+function contenido_metabox_pedido($post) {
+    // Metas "SOLO TEXTO"
+    $metas_texto = array(
+        'nombres' => __('Nombres', 'texto-dominio'),
+        'apellido1' => __('Apellido 1', 'texto-dominio'),
+        'tipo_solicitud_respuesta_api' => __('Tipo Solicitud', 'texto-dominio'),
+        'tipo_firma_uso_woo' => __('Firma', 'texto-dominio'),
+        'vigenciafirma' => __('Vigencia', 'texto-dominio'),
+        'numerodocumento' => __('Identificación', 'texto-dominio'),
+        'coddactilar' => __('Código dactilar', 'texto-dominio'),
+        'fecha_nacimiento' => __('Fecha de nacimiento', 'texto-dominio'),
+        'empresa' => __('Empresa', 'texto-dominio'),
+        'ruc_empresa' => __('Ruc Empresa', 'texto-dominio'),
+        'cargo' => __('Cargo', 'texto-dominio'),
+        'motivo' => __('Motivo', 'texto-dominio'),
+        'unidad' => __('Unidad', 'texto-dominio'),
+        'nombresRL' => __('Nombre Representante Legal', 'texto-dominio'),
+        'apellidosRL' => __('Apellidos Representante Legal', 'texto-dominio'),
+        'numerodocumentoRL' => __('Representado ID', 'texto-dominio'),
+    );
+
+    // Generar el contenido para cada meta "SOLO TEXTO"
+    foreach ($metas_texto as $meta_key => $meta_title) {
+        // Obtener el metadato
+        $meta_value = get_post_meta($post->ID, $meta_key, true);
+
+        if ($meta_value) {
+            echo '<p><strong>' . $meta_title . ':</strong> ' . $meta_value . '</p>';
+        }
+    }
+	
+	// Nuevo tipo de Array (VISUALES IMAGEN)
+    $metas_visuales_imagen = array(
+        'f_cedulaFront' => __('Frontal cedula:', 'texto-dominio'),
+        'f_cedulaBack' => __('Posterior cedula:', 'texto-dominio'),
+        'f_selfie' => __('Foto selfie:', 'texto-dominio'),
+    );
+
+    // Generar el contenido para cada meta del tipo VISUALES IMAGEN
+    foreach ($metas_visuales_imagen as $meta_key => $meta_title) {
+        // Obtener el metadato
+        $meta_value = get_post_meta($post->ID, $meta_key, true);
+
+        if ($meta_value) {
+            // Generar el enlace con el código base64
+            $enlace = 'data:image/jpeg;base64,' . $meta_value;
+
+            // Enlace para abrir el archivo en colorbox
+            echo '<p>' . $meta_title . ': <a href="' . $enlace . '" class="colorbox-link">Ver</a></p>';
+        }
+    }
+
+    // MODIFICABLES
+    $metas = array(
+        'f_copiaruc' => __('Copia RUC', 'texto-dominio'),
+        'f_nombramiento' => __('Nombramiento 1', 'texto-dominio'),
+        'f_nombramiento2' => __('Nombramiento 2', 'texto-dominio'),
+        'f_constitucion' => __('Constitución', 'texto-dominio'),
+        'f_documentoRL' => __('Documento representante legal', 'texto-dominio'),
+        'f_autreprelegal' => __('Autorización representante legal', 'texto-dominio'),
+    );
+
+    // Generar el contenido para cada meta
+    foreach ($metas as $meta_key => $meta_title) {
+        // Obtener el metadato
+        $meta_value = get_post_meta($post->ID, $meta_key, true);
+
+        if ($meta_value) {
+            // Generar el enlace con el código base64
+            $enlace = 'data:application/pdf;base64,' . $meta_value;
+
+            // Enlace para abrir el archivo en colorbox
+            echo '<p>' . $meta_title . ': <a href="' . $enlace . '" class="colorbox-link">Ver</a></p>';
+
+            // Campo para subir archivo PDF
+            echo '<p><input type="file" id="archivo_' . $meta_key . '" name="archivo_' . $meta_key . '" accept=".pdf" /></p>';
+
+            // Campo de texto para mostrar el código base64 (oculto por defecto)
+            echo '<p style="display:none;"><input type="text" id="codigo_base64_' . $meta_key . '" name="codigo_base64_' . $meta_key . '" readonly /></p>';
+
+            // Botón "Subir PDF"
+            echo '<p><button id="btn_convertir_base64_' . $meta_key . '">Subir PDF</button></p>';
+        }
+    }
+
+    // Botón "Actualizar" (alineado a la derecha)
+    echo '<p style="text-align:right;"><button id="btn_actualizar" name="btn_actualizar">Actualizar</button></p>';
+
+    // Script para extraer el código base64 del archivo y actualizar el metadato
+    ?>
+    <link rel="stylesheet" href="https://firmaecuador.net/wp-content/color_box_pdf/example5/colorbox.css">
+    <script src="https://firmaecuador.net/wp-content/color_box_pdf/jquery.colorbox-min.js"></script>
+    <script>
+    jQuery(document).ready(function($) {
+        <?php
+        // Generar el código JavaScript para cada meta
+        foreach (array_merge($metas, $metas_visuales_imagen) as $meta_key => $meta_title) {
+            ?>
+            $('#btn_convertir_base64_<?php echo $meta_key; ?>').click(function(e) {
+                e.preventDefault();
+
+                // Obtener el archivo subido
+                var archivo_<?php echo $meta_key; ?> = $('#archivo_<?php echo $meta_key; ?>')[0].files[0];
+
+                if (archivo_<?php echo $meta_key; ?>) {
+                    var reader_<?php echo $meta_key; ?> = new FileReader();
+
+                    reader_<?php echo $meta_key; ?>.onload = function(e) {
+                        var codigoBase64_<?php echo $meta_key; ?> = e.target.result;
+
+                        // Mostrar el código base64 en el campo de texto
+                        $('#codigo_base64_<?php echo $meta_key; ?>').val(codigoBase64_<?php echo $meta_key; ?>);
+
+                        // Mostrar mensaje de éxito
+                        alert('Archivo subido');
+                    };
+
+                    reader_<?php echo $meta_key; ?>.readAsDataURL(archivo_<?php echo $meta_key; ?>);
+                } else {
+                    alert('Por favor, selecciona un archivo.');
+                }
+            });
+
+            <?php
+        }
+        ?>
+
+        $('#btn_actualizar').click(function(e) {
+            e.preventDefault();
+
+            var metadatos_actualizados = false;
+
+            <?php
+            // Generar el código JavaScript para actualizar cada meta
+            foreach (array_merge($metas, $metas_visuales_imagen) as $meta_key => $meta_title) {
+                ?>
+                // Obtener el código base64
+                var codigoBase64_<?php echo $meta_key; ?> = $('#codigo_base64_<?php echo $meta_key; ?>').val();
+
+                if (codigoBase64_<?php echo $meta_key; ?>) {
+                    // Realizar la petición AJAX para actualizar el metadato
+                    $.ajax({
+                        url: ajaxurl,
+                        type: 'POST',
+                        async: false,
+                        data: {
+                            action: 'actualizar_metadato',
+                            post_id: <?php echo $post->ID; ?>,
+                            meta_key: '<?php echo $meta_key; ?>',
+                            codigo_base64: codigoBase64_<?php echo $meta_key; ?>,
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                metadatos_actualizados = true;
+                            }
+                        },
+                        error: function() {
+                            // Mostrar notificación de error
+                            alert('No se pudo realizar la actualización de "<?php echo $meta_key; ?>".');
+                        }
+                    });
+                }
+                <?php
+            }
+            ?>
+
+            if (metadatos_actualizados) {
+                // Recargar la página
+                location.reload();
+
+                // Mostrar notificación de éxito
+                alert('Metadatos actualizados.');
+            } else {
+                // Mostrar notificación de error
+                alert('No se ha realizado ningún cambio.');
+            }
+        });
+
+        // Inicializar Colorbox
+        $('.colorbox-link').colorbox({
+            iframe: true,
+            innerWidth: '90%',
+            innerHeight: '90%',
+            maxWidth: '700px',
+            maxHeight: '600px',
+        });
+    });
+    </script>
+    <?php
+}
+
+// Actualizar el metadato
+function actualizar_metadato() {
+    $response = array();
+
+    if (isset($_POST['post_id']) && isset($_POST['meta_key']) && isset($_POST['codigo_base64'])) {
+        $post_id = absint($_POST['post_id']);
+        $meta_key = sanitize_text_field($_POST['meta_key']);
+        $codigo_base64 = sanitize_text_field($_POST['codigo_base64']);
+
+        // Verificar si el código base64 ya contiene la cadena "data:application/pdf;base64,"
+        if (strpos($codigo_base64, 'data:application/pdf;base64,') === 0) {
+            // Eliminar la cadena "data:application/pdf;base64," del código base64
+            $codigo_base64 = substr($codigo_base64, strlen('data:application/pdf;base64,'));
+        }
+
+        // Actualizar el metadato
+        update_post_meta($post_id, $meta_key, $codigo_base64);
+
+        $response['success'] = true;
+    } else {
+        $response['success'] = false;
+    }
+
+    wp_send_json($response);
+}
+add_action('wp_ajax_actualizar_metadato', 'actualizar_metadato');
+
+?>
+
+
